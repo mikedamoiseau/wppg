@@ -1,0 +1,10 @@
+- Docker Container: extra services (mailhog, ...)
+- Phar ?
+- traefik with http/https
+- Change the image for apache
+
+
+
+Separate project?
+-----------------
+- WP with composer

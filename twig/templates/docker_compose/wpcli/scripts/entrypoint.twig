@@ -1,0 +1,55 @@
+#!/bin/bash -e
+
+echo "Installing WordPress client tool..."
+cd /var/www/html && curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp
+
+wp_present() {
+  [ -f wp-login.php ]
+}
+
+wp_config_present() {
+  [ -f wp-config.php ]
+}
+
+wait_for_db() {
+  counter=0
+  echo "Connecting to mysql"
+  while ! curl --silent mysql:{{ db_port }} >/dev/null; do
+    counter=$((counter+1))
+    if [ $counter == 30 ]; then
+      echo "Error: Couldn't connect to mysql."
+      exit 1
+    fi
+    echo "Trying to connect to mysql. Attempt $counter."
+    sleep 5
+  done
+}
+
+##########
+
+echo "Install MySQL client if needed..."
+apt-get update && apt-get install mariadb-client -y
+
+# If no WordPress files found, download the core
+if ! wp_present; then
+  echo "wp core download --allow-root"
+  wp core download --allow-root
+fi
+
+# If no configuration file found, configure and install the instance
+if ! wp_config_present; then
+  wp config create --dbname="{{ db_name|bashescape }}" --dbuser=root --dbpass="{{ db_root_password|bashescape }}" --dbhost=mysql --dbprefix="{{  wp_db_prefix|bashescape }}" --allow-root
+  wp core install --url=localhost --title="{{ project_name|bashescape }}" --admin_user="{{ wp_user_name|bashescape }}" --admin_password="{{  wp_user_password|bashescape }}" --admin_email="{{ wp_user_email|bashescape }}" --allow-root
+fi
+
+# Wait for the database
+# wait_for_db
+
+{%  if webserver == 'apache' %}
+  echo "Starting the Apache process..."
+  apache2-foreground
+{%  else %}
+  echo "Starting the PHP-FPM process..."
+  php-fpm
+{% endif %}
+
