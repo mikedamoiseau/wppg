@@ -1,9 +1,9 @@
-# WPPG - WordPress Project Generator
+# WPPG - WP Project Generator
 
 ## What is WPPG
 **WPPG** was first created as an internal tool for the company I am currently working for: [Buzzwoo](https://www.buzzwoo.de).
 
-It is a command line tool used to create a new empty WordPress project running on [Docker-Compose](https://docs.docker.com/compose/). Related configuration files are also created by WPPG (readme, gitignore, ...).
+It is a command line tool used to create a new empty [**WordPress**](https://wordpress.org/) project running on [Docker-Compose](https://docs.docker.com/compose/). Related configuration files are also created by WPPG (readme, gitignore, ...).
 
 ## Current version
 1.0 -- See [changelog](./changelog) for the versions and related changes.
