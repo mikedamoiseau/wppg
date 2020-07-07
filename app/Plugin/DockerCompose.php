@@ -264,7 +264,7 @@ Class DockerCompose extends AbstractPlugin {
           'test' => '["CMD-SHELL", \'mysql --database=$$MYSQL_DATABASE --password=$$MYSQL_ROOT_PASSWORD --execute="SELECT count(table_name) > 0 FROM information_schema.tables;" --skip-column-names -B\']',
           'interval' => '30s',
           'timeout' => '10s',
-          'retries' => '4',
+          'retries' => 4,
         ],
       ],
     ];
