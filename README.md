@@ -19,8 +19,8 @@ The rest of the process consist in answering a few questions related to the Word
 - The name of the project
 - Some questions related to the WordPress user account
 - Some questions related to the configuration of WordPress itself:
-- The web server environment
-- The database environment
+  - The web server environment
+  - The database environment
 - Whether to include PHPMyAdmin or not
 
 ## Files and folders created by *WPPG*
@@ -45,6 +45,8 @@ The project will be created in a specific folder based on the project name
 1. [WP-CLI](https://wp-cli.org/) will be automatically downloaded and installed in your `wpcli` docker image, as well as the `mysql-client`, a required library to import/export the database using the command line.
 2. If there is no instance of WordPress installed in the folder `html`, the latest version will be automatically downloaded when starting your containers.
 3. If no configuration file is found in `html/wp-config.php`, a new configuration file will be created for you.
+4. A bunch of debugging plugins will be downloaded and installed for you to help you in your development process.
+5. Notice, Warning and Error messages are not displayed in the browser but in a log file  located in `wp-content/debug.log`
 
 ## How to start
 Once you have created your project, you can directly start working on it.
@@ -56,3 +58,10 @@ $ docker-compose up
 ```
 The container may take some time to start the first time as it will download the latest version of WordPress.
 
+Then, open your browser and navigate to `http://localhost`.
+
+If you need to run wp-cli, execute it through docker-compose: `docker-compose exec wpcli wp --allow-root plugin list`
+
+To access PHPMyAdmin: navigate to `http://localhost:8080`
+
+That's it, I hope you'll enjoy using my little project!
