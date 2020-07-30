@@ -40,10 +40,10 @@ Class DockerCompose extends AbstractPlugin {
     $this->output->writeln('<comment>Database:</comment>');
     $this->services = array_merge($this->services, $this->getDbServerConfig());
 
-    $this->output->writeln('<comment>PHPMyAdmin:</comment>');
+    $this->output->writeln('<comment>DB Tool:</comment>');
     $this->extraServices = array_merge(
       $this->extraServices,
-      $this->getPHPMyAdmin()
+      $this->getDbManagerTool()
     );
 
     return [self::SLUG => $this->options];
@@ -126,7 +126,7 @@ Class DockerCompose extends AbstractPlugin {
     //];
     $blocks['php']['restart']     = 'on-failure';
     $blocks['php']['working_dir'] = '/var/www/html';
-    $blocks['php']['depends_on']  = ['mysql'];
+    $blocks['php']['depends_on']  = ['db'];
 
     // WP Cli
     $blocks['wpcli'] = [
@@ -141,7 +141,7 @@ Class DockerCompose extends AbstractPlugin {
         '/scripts/entrypoint.sh',
       ],
       'working_dir' => '/var/www/html',
-      'depends_on' => ['mysql'],
+      'depends_on' => ['db'],
     ];
 
     // service for Web server + PHP
@@ -157,6 +157,7 @@ Class DockerCompose extends AbstractPlugin {
     $question->setAutocompleterValues($dbs);
     $dbManager = $this->helper->ask($this->input, $this->output, $question);
     $dbManager = strtolower($dbManager);
+    $dbManager = 'mariadb';
 
     // Database version
     $versions       = [];
@@ -188,18 +189,18 @@ Class DockerCompose extends AbstractPlugin {
 
     // Confirm Database service name
     $dbManagerService = sprintf('%s:%s', $dbManager, $dbManagerVersion);
-    $question         = new Question(
-      sprintf(
-        'Here is your last chance to change the name of the docker image for the database [%s] ',
-        $dbManagerService
-      ),
-      $dbManagerService
-    );
-    $dbManagerService = $this->helper->ask(
-      $this->input,
-      $this->output,
-      $question
-    );
+    //$question         = new Question(
+    //  sprintf(
+    //    'Here is your last chance to change the name of the docker image for the database [%s] ',
+    //    $dbManagerService
+    //  ),
+    //  $dbManagerService
+    //);
+    //$dbManagerService = $this->helper->ask(
+    //  $this->input,
+    //  $this->output,
+    //  $question
+    //);
     $dbManagerService = strtolower($dbManagerService);
 
     $question = new Question(
@@ -250,7 +251,7 @@ Class DockerCompose extends AbstractPlugin {
     $this->options['db_root_password'] = $dbRootPassword;
 
     return [
-      'mysql' => [
+      'db' => [
         'image'       => $dbManagerService,
         'ports'       => [sprintf('%d:%d', $dbPort, 3306)],
         'environment' => [
@@ -270,31 +271,65 @@ Class DockerCompose extends AbstractPlugin {
     ];
   }
 
-  private function getPHPMyAdmin() {
+  private function getDbManagerTool() {
     $question          = new ConfirmationQuestion(
-      'Do you want to include PHPmyAdmin? [Yes/no] ', TRUE
+      'Do you want to include some database manager tool? [Yes/no] ', TRUE
     );
-    $includePhpMyAdmin = $this->helper->ask(
+    $includeDbTool = $this->helper->ask(
       $this->input,
       $this->output,
       $question
     );
-
-    $this->options['phpmyadmin'] = $includePhpMyAdmin;
-
-    if (!$includePhpMyAdmin) {
+    if (!$includeDbTool) {
       return [];
     }
+
+    // Which DB tool
+    $question  = new ChoiceQuestion(
+      'Which database manager tool do you want to use? [PHPMyAdmin]',
+      ['PHPMyAdmin', 'Adminer'],
+      0
+    );
+    $dbTool = $this->helper->ask($this->input, $this->output, $question);
+    $dbTool = strtolower($dbTool);
+
+    switch ($dbTool) {
+      case 'phpmyadmin':
+        return $this->getPHPMyAdmin();
+        break;
+      case 'adminer':
+        return $this->getAdminer();
+        break;
+    }
+
+    // unsupported db tool
+    return [];
+  }
+
+  private function getPHPMyAdmin() {
+    $this->options['db_manager_tool'] = 'PHPMyAdmin';
 
     return [
       'phpmyadmin' => [
         'image'       => 'phpmyadmin/phpmyadmin',
         'environment' => [
-          'PMA_HOST=mysql',
+          'PMA_HOST=db',
           'PMA_USER=root',
           'PMA_PASSWORD=' . $this->options['db_root_password'],
         ],
-        'restart'     => 'always',
+        'restart'     => 'on-failure',
+        'ports'       => ['8080:80'],
+      ],
+    ];
+  }
+
+  private function getAdminer() {
+    $this->options['db_manager_tool'] = 'Adminer';
+
+    return [
+      'adminer' => [
+        'image'       => 'dockette/adminer:full',
+        'restart'     => 'on-failure',
         'ports'       => ['8080:80'],
       ],
     ];
@@ -338,7 +373,7 @@ Class DockerCompose extends AbstractPlugin {
       ['Database service name' => $this->options['db_service_name']],
       ['Database name' => $this->options['db_name']],
       ['Database root password' => $this->options['db_root_password']],
-      ['Include PHPMyAdmin' => $this->options['phpmyadmin'] ? 'yes' : 'no'],
+      ['Include DB tool' => $this->options['db_manager_tool'] ?: '-'],
     ];
   }
 
