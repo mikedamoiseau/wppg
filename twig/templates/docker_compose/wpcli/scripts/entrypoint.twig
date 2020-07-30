@@ -38,7 +38,7 @@ fi
 
 # If no configuration file found, configure and install the instance
 if ! wp_config_present; then
-  wp config create --dbname="{{ db_name|bashescape }}" --dbuser=root --dbpass="{{ db_root_password|bashescape }}" --dbhost=mysql --dbprefix="{{  wp_db_prefix|bashescape }}" --allow-root --extra-php <<PHP
+  wp config create --dbname="{{ db_name|bashescape }}" --dbuser=root --dbpass="{{ db_root_password|bashescape }}" --dbhost=db --dbprefix="{{  wp_db_prefix|bashescape }}" --allow-root --extra-php <<PHP
   define( 'WP_DEBUG', true );
   define( 'WP_DEBUG_LOG', true );
   define( 'SAVEQUERIES', true );
