@@ -53,7 +53,7 @@ class WordPressConfigurator extends AbstractPlugin {
       $question
     );
 
-    $question = new Question('What is the admin password?');
+    $question = new Question('What is the admin password? ');
     $question->setValidator(
       function ($answer) {
         // GDPR compliance...
