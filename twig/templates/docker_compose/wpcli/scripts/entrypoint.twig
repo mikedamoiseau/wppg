@@ -44,7 +44,7 @@ if ! wp_config_present; then
   define( 'SAVEQUERIES', true );
   define( 'WP_DEBUG_DISPLAY', false );
 PHP
-  wp core install --url="localhost" --title="{{ project_name|bashescape }}" --admin_user="{{ wp_user_name|bashescape }}" --admin_password="{{  wp_user_password|bashescape }}" --admin_email="{{ wp_user_email|bashescape }}" --allow-root
+  wp core install --url="localhost" --title="{{ project_name|bashescape }}" --admin_user="{{ wp_user_name|bashescape }}" --admin_password="{{  wp_user_password|bashescape }}" --admin_email="{{ wp_user_email|bashescape }}" --skip-email --allow-root
 fi
 
 # Wait for the database
