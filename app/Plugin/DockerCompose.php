@@ -157,7 +157,6 @@ Class DockerCompose extends AbstractPlugin {
     $question->setAutocompleterValues($dbs);
     $dbManager = $this->helper->ask($this->input, $this->output, $question);
     $dbManager = strtolower($dbManager);
-    $dbManager = 'mariadb';
 
     // Database version
     $versions       = [];
