@@ -23,7 +23,7 @@ class WordPressConfigurator extends AbstractPlugin {
     $this->output->writeln("Some questions about WordPress...");
 
     $question = new Question(
-      'What is the name of the admin account? [adminwp]',
+      'What is the name of the admin account? [adminwp] ',
       'adminwp'
     );
 
@@ -34,7 +34,7 @@ class WordPressConfigurator extends AbstractPlugin {
     );
 
     $question = new Question(
-      'What is the email address of the admin account? [adminwp@example.com]',
+      'What is the email address of the admin account? [adminwp@example.com] ',
       'adminwp@example.com'
     );
     $question->setValidator(
