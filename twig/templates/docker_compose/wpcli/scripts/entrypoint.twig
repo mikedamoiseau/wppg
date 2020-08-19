@@ -51,7 +51,9 @@ fi
 # wait_for_db
 
 # Install the development plugins
+{%  if install_debugging_plugins %}
 wp --allow-root plugin install debug-bar debug-bar-console debug-bar-shortcodes debug-bar-constants debug-bar-post-types debug-bar-cron debug-bar-actions-and-filters-addon debug-bar-transients debug-bar-list-dependencies debug-bar-remote-requests --activate
+{% endif %}
 
 {%  if webserver == 'apache' %}
   echo "Starting the Apache process..."

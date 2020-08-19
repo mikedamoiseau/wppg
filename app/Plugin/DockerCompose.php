@@ -478,8 +478,7 @@ Class DockerCompose extends AbstractPlugin {
     $content = $this->twig->render(
       "docker_compose/wpcli/scripts/entrypoint.twig",
       [
-        // 'webserver'        => $this->options['webserver'],
-        'webserver'        => 'nginx',
+        'webserver'        => $this->options['webserver'],
         'db_name'          => $this->options['db_name'],
         'db_root_password' => $this->options['db_root_password'],
         'db_port'          => $this->options['db_port'],
@@ -488,6 +487,7 @@ Class DockerCompose extends AbstractPlugin {
         'wp_user_name'     => $options[WordPressConfigurator::SLUG]['wp_user_name'],
         'wp_user_password' => $options[WordPressConfigurator::SLUG]['wp_user_password'],
         'wp_user_email'    => $options[WordPressConfigurator::SLUG]['wp_user_email'],
+        'install_debugging_plugins' => $options[WordPressConfigurator::SLUG]['install_debugging_plugins'],
       ]
     );
     $filesystem->dumpFile(
