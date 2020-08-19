@@ -4,6 +4,7 @@ namespace App\Plugin;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 
 class WordPressConfigurator extends AbstractPlugin {
@@ -107,6 +108,15 @@ class WordPressConfigurator extends AbstractPlugin {
       $question
     );
 
+    $question = new ConfirmationQuestion(
+      'Do you want to automatically install and activate the debugging plugins? [yes/No] ', FALSE
+    );
+    $this->options['install_debugging_plugins'] = $this->helper->ask(
+      $this->input,
+      $this->output,
+      $question
+    );
+
     return [self::SLUG => $this->options];
   }
 
@@ -119,6 +129,7 @@ class WordPressConfigurator extends AbstractPlugin {
       ['Admin email' => $this->options['wp_user_email']],
       ['Admin password' => $this->options['wp_user_password']],
       ['Table prefix (database)' => $this->options['wp_db_prefix']],
+      ['Install debugging plugins' => $this->options['install_debugging_plugins'] ? 'yes' : 'no'],
     ];
   }
 
