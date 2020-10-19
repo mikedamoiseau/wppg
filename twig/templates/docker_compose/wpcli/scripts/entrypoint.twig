@@ -56,8 +56,10 @@ wp --allow-root plugin install debug-bar debug-bar-console debug-bar-shortcodes 
 {% endif %}
 
 {%  if webserver == 'apache' %}
-  echo "Starting the Apache process..."
-  apache2-foreground
+  echo "Starting the PHP-FPM process..."
+  php-fpm
+  #echo "Starting the Apache process..."
+  #apache2-foreground
 {%  else %}
   echo "Starting the PHP-FPM process..."
   php-fpm
