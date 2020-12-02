@@ -75,13 +75,54 @@ class CreateProject extends Command {
   }
 
   /**
+   * Return the user's home directory.
+   */
+  private function getServerHome() {
+    // getenv('HOME') isn't set on Windows and generates a Notice.
+    $home = getenv('HOME');
+    if (!empty($home)) {
+      // home should never end with a trailing slash.
+      $home = rtrim($home, '/');
+    }
+    elseif (!empty($_SERVER['HOMEDRIVE']) && !empty($_SERVER['HOMEPATH'])) {
+      // home on windows
+      $home = $_SERVER['HOMEDRIVE'] . $_SERVER['HOMEPATH'];
+      // If HOMEPATH is a root directory the path can end with a slash. Make sure
+      // that doesn't happen.
+      $home = rtrim($home, '\\/');
+    }
+    return empty($home) ? NULL : $home;
+  }
+
+  /**
    * Initialize the Twig component
    */
   private function initTwig(): void {
     $loader = new \Twig\Loader\FilesystemLoader(APP_FOLDER . '/twig/templates');
 
+    $home_folder = $this->getServerHome();
+    $possible_cache_folders = array_filter([
+      // @see https://stackoverflow.com/a/32528391
+      $home_folder ? $home_folder . '/.wppg/cache' : NULL,
+      '/tmp/wppg',
+      APP_FOLDER . '/twig/compilation_cache'
+    ]);
+
+    $selected_cache_folder = '';
+    foreach ($possible_cache_folders as $cache_folder) {
+      if (is_dir($cache_folder)) {
+        $selected_cache_folder = $cache_folder;
+        break;
+      }
+
+      if (mkdir($cache_folder, 0777, true)) {
+        $selected_cache_folder = $cache_folder;
+        break;
+      }
+    }
+
     $this->twig = new \Twig\Environment($loader, [
-      'cache' => APP_FOLDER . '/twig/compilation_cache',
+      'cache' => !empty($selected_cache_folder) ? $selected_cache_folder : FALSE,
     ]);
 
     // an anonymous function
