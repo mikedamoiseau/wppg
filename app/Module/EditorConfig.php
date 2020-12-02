@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Plugin;
+namespace App\Module;
 
 use Symfony\Component\Filesystem\Filesystem;
 
-Class EditorConfig extends AbstractPlugin {
+Class EditorConfig extends AbstractModule {
 
   const SLUG = 'editor_config';
 

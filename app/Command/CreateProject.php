@@ -2,21 +2,17 @@
 
 namespace App\Command;
 
-use App\Plugin\DockerCompose;
-use App\Plugin\EditorConfig;
-use App\Plugin\Git;
-use App\Plugin\ProjectInfo;
-use App\Plugin\WordPressConfigurator;
+use App\Module\DockerCompose;
+use App\Module\EditorConfig;
+use App\Module\Git;
+use App\Module\ProjectInfo;
+use App\Module\WordPressConfigurator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Yaml\Yaml;
 
 define('VIEWS_PATH', APP_FOLDER . '/views/');
 

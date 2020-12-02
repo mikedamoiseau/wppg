@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Plugin;
+namespace App\Module;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -8,7 +8,7 @@ use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Filesystem\Filesystem;
 use Twig\Environment;
 
-Class ProjectInfo extends AbstractPlugin {
+Class ProjectInfo extends AbstractModule {
   const SLUG = 'project_info';
 
   /**
