@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Plugin;
+namespace App\Module;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Twig\Environment;
 
-abstract class AbstractPlugin {
+abstract class AbstractModule {
 
   protected $helper;
 

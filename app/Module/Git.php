@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Plugin;
+namespace App\Module;
 
 use Symfony\Component\Filesystem\Filesystem;
 
-Class Git extends AbstractPlugin {
+Class Git extends AbstractModule {
 
   const SLUG = 'git';
 

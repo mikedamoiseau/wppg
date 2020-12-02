@@ -1,16 +1,14 @@
 <?php
 
-namespace App\Plugin;
+namespace App\Module;
 
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
 
-Class DockerCompose extends AbstractPlugin {
+Class DockerCompose extends AbstractModule {
 
   const SLUG = 'docker_compose';
 
