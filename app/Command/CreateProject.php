@@ -2,14 +2,18 @@
 
 namespace App\Command;
 
+use App\Config\ConfigExporter;
 use App\Module\DockerCompose;
 use App\Module\EditorConfig;
 use App\Module\Git;
 use App\Module\ProjectInfo;
 use App\Module\WordPressConfigurator;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Helper\TableSeparator;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -21,7 +25,8 @@ class CreateProject extends Command {
   // the name of the command (the part after "bin/console")
   protected static $defaultName = 'new';
 
-  protected $helper;
+  /** @var QuestionHelper */
+  protected $questionHelper;
 
   /** @var InputInterface $input */
   protected $input;
@@ -30,7 +35,7 @@ class CreateProject extends Command {
   protected $output;
 
   /** @var array */
-  private $plugins = [
+  private $modules = [
     ProjectInfo::class,
     WordPressConfigurator::class,
     DockerCompose::class,
@@ -42,16 +47,32 @@ class CreateProject extends Command {
   private $options = [];
 
   /** @var array  */
-  private $loadedPlugins = [];
+  private $loadedModules = [];
 
   /** @var \Twig\Environment */
   protected $twig;
 
+  /** @var array */
+  private $executionOptions = [];
+
+  protected function configure() {
+    $this
+      ->setDescription('wppg new [--cex=="path/to/the/file"] [--cexf="json|yaml"]')
+      ->setDefinition(
+        new InputDefinition([
+          new InputOption('cex', NULL, InputOption::VALUE_OPTIONAL, 'Export the configuration to a file', false),
+          new InputOption('cexf', NULL, InputOption::VALUE_REQUIRED, 'Format of the exported configuration file ("yaml" or "json")', 'yaml'),
+        ])
+      );
+  }
+
   protected function execute(InputInterface $input, OutputInterface $output) {
     $this->input  = $input;
     $this->output = $output;
-    $this->helper = $this->getHelper('question');
+    $this->questionHelper = $this->getHelper('question');
     $this->initTwig();
+
+    $this->executionOptions = $input->getOptions();
 
     $this->output->writeln(
       "Wizard in action... Let's start with the <info>WordPress</info> project!"
@@ -64,10 +85,47 @@ class CreateProject extends Command {
       "<comment>2. Control-C to cancel the creation of the project</comment>"
     );
 
-    $this->instantiatePlugins();
-    $this->runPlugins();
-    $this->summarizePlugins();
-    $this->executePlugins();
+    $this->instantiateModules();
+    $this->runModules();
+    $this->summarizeModules();
+
+    if ($this->shouldExportConfig()) {
+      $this->saveConfigFile(
+        $this->exportModules(),
+        $this->getExportConfigType()
+      );
+    } else {
+      $this->executeModules();
+    }
+
+  }
+
+  private function saveConfigFile(array $data, string $format): bool {
+    try {
+      return (new ConfigExporter($format))->export(
+        $data,
+        $this->getExportConfigPath()
+      );
+    } catch (\Exception $e) {
+      echo $e->getMessage();
+      // Nothing to do
+    }
+
+    return FALSE;
+  }
+
+  private function shouldExportConfig(): bool {
+    return $this->executionOptions['cex'] !== false;
+  }
+
+  private function getExportConfigPath(): string {
+    return !empty($this->executionOptions['cex']) ?
+      $this->executionOptions['cex'] :
+      'wppg';
+  }
+
+  private function getExportConfigType(): string {
+    return $this->executionOptions['cexf'] ?? 'yaml';
   }
 
   /**
@@ -128,22 +186,22 @@ class CreateProject extends Command {
     $this->twig->addFilter($filter);
   }
 
-  private function instantiatePlugins() {
-    $this->loadedPlugins = array_map(
+  private function instantiateModules() {
+    $this->loadedModules = array_map(
       function ($className) {
         return new $className(
           $this->input,
           $this->output,
-          $this->helper,
+          $this->questionHelper,
           $this->twig
         );
       },
-      $this->plugins
+      $this->modules
     );
   }
 
-  private function runPlugins() {
-    foreach ($this->loadedPlugins as $plugin) {
+  private function runModules() {
+    foreach ($this->loadedModules as $plugin) {
       $this->output->writeln('<info>' . $plugin->getName() . '</info>');
 
       $this->options = array_merge(
@@ -153,9 +211,9 @@ class CreateProject extends Command {
     }
   }
 
-  private function summarizePlugins() {
+  private function summarizeModules() {
     $summary = [];
-    foreach ($this->loadedPlugins as $idx => $plugin) {
+    foreach ($this->loadedModules as $idx => $plugin) {
       if ($idx) {
         $summary[] = new TableSeparator();
       }
@@ -173,17 +231,40 @@ class CreateProject extends Command {
     $io->definitionList(...$summary);
 
     $question = new ConfirmationQuestion('Would you like to proceed? [Yes/no] ', TRUE);
-    $correct  = $this->helper->ask($this->input, $this->output, $question);
+    $correct  = $this->questionHelper->ask($this->input, $this->output, $question);
 
     if (!$correct) {
       throw new \Exception('The creation of the project has been cancelled.');
     }
   }
 
-  private function executePlugins() {
-    foreach ($this->loadedPlugins as $plugin) {
+  private function executeModules() {
+    foreach ($this->loadedModules as $plugin) {
       $plugin->execute($this->options);
     }
+  }
+
+  private function exportModules() {
+    $exported_config = [
+      'generator' => 'wppg',
+      'version' => APP_VERSION,
+      'creation' => (new \DateTime())->format('c'),
+    ];
+
+    foreach ($this->loadedModules as $module) {
+      $data = $module->export($this->options);
+
+      if (empty($data)) {
+        continue;
+      }
+
+      $exported_config = array_merge(
+        $exported_config,
+        [$module->getKey() => $data]
+      );
+    }
+
+    return $exported_config;
   }
 
 }

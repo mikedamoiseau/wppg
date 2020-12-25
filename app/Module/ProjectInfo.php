@@ -24,7 +24,7 @@ Class ProjectInfo extends AbstractModule {
   public function run(): array {
     $question = new Question(
       'Please enter the name of the project: ',
-      'Buzzwoo WordPress Project'
+      'WPPG WordPress Project'
     );
     $question->setValidator(
       function ($answer) {

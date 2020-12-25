@@ -35,14 +35,27 @@ abstract class AbstractModule {
   }
 
   /**
-   * Get the name of the plugin (mostly for summary section)
+   * Get the name of the module (mostly for summary section)
    *
-   * @return string The name of the plugin
+   * @return string The name of the module
    */
   abstract public function getName(): string;
 
   /**
-   * Run the plugin (means ask questions)
+   * Get the key of the module
+   *
+   * @return string The key of the module
+   */
+  public function getKey(): string {
+    return str_replace(
+      'app\\module\\',
+      '',
+      strtolower(static::class)
+    );
+  }
+
+  /**
+   * Run the module (means ask questions)
    *
    * @return array The options selected by user
    */
@@ -62,10 +75,17 @@ abstract class AbstractModule {
   /**
    * Execute the plugin (mostly create files, folders, ...)
    *
-   * @param array $options The list of options returned by all plugins
+   * @param array $options The list of options returned by all modules
    */
   public function execute(array $options): void {
 
+  }
+
+  /**
+   * Export the options of the module
+   */
+  public function export(): array {
+    return $this->options;
   }
 
 }

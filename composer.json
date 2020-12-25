@@ -8,7 +8,9 @@
     "symfony/filesystem": "^4.2",
     "symfony/yaml": "^4.2",
     "hirak/prestissimo": "^0.3.10",
-    "twig/twig": "^3.0"
+    "twig/twig": "^3.0",
+    "symfony/serializer": "^5.2",
+    "symfony/property-access": "^5.2"
   },
   "autoload": {
     "psr-4": {
